@@ -1,0 +1,3 @@
+biopython
+snakemake
+pulp >=2.0
