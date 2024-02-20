@@ -2,10 +2,10 @@
 from Bio import SeqIO
 
 # now trying it with my own data
-with open('model/test.fasta', 'r') as test:
+with open('../data/test.fasta', 'r') as test:
     sequences_test = list(SeqIO.parse(test, 'fasta'))
 
-with open('model/train.fasta', 'r') as train:
+with open('../data/train.fasta', 'r') as train:
     sequences_train = list(SeqIO.parse(train, 'fasta'))
 # Function to convert sequences to k-mers
 def seq2kmer(seq, k):

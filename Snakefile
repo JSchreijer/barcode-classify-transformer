@@ -1,10 +1,5 @@
 #dsnakefile
 
-rule test:
-    input:
-        'test.txt'
-    script:
-        'test.py'
 
 rule split_sequences:
     input:
@@ -17,3 +12,14 @@ rule split_sequences:
         dependencies='requirements.txt'
     script:
         "random_sequences.py"
+
+rule kmer_formatting:
+    input:
+        test_data = 'model/test.fasta',
+        train_data = 'model/train.fasta'
+
+    output:
+        'model/kmers_test.fasta',
+        'model/kmers_train.fasta'
+    script:
+        'kmer_formatting.py'

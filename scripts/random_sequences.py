@@ -10,7 +10,7 @@ import random
 num_sequences = 25
 
 # importing data
-with open('data/backbone.fasta', 'r') as input_file:
+with open('../data/backbone.fasta', 'r') as input_file:
     sequences = list(SeqIO.parse(input_file, 'fasta'))
 
 # Randomly select 25 sequences [Random Route]
@@ -19,7 +19,7 @@ with open('data/backbone.fasta', 'r') as input_file:
 # selected_ids = set(seq.id for seq in selected_sequences)
 
 # Select 25 sequences from input file Query_ID.testX.txt [Selected Route]
-with open('model/Query_ID.test1.txt', 'r') as Query_IDs:
+with open('../model/Query_ID.test1.txt', 'r') as Query_IDs:
     selected_ids = set(line.strip() for line in Query_IDs)
 selected_sequences = [seq for seq in sequences if seq.id in selected_ids]
 
