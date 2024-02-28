@@ -33,15 +33,25 @@ bash Mambaforge-Linux-x86_64.sh
 Afterwards, a working directory is created using the mkdir function and calling it using the cd function. 
 The environment is activated using conda. 
 
-For the creation of DNABERT, the following packages are required: 
+For the creation of DNABERT-S, the following packages are required: 
 ```
-conda install pytorch torchvision cudatoolkit=10.0 -c pytorch
+# command line
+gdown 1p59ch_MO-9DXh3LUIvorllPJGLEAwsUp # pip install gdown
+unzip dnabert-s_train.zip  # unzip the data 
 
-git clone https://github.com/jerryji1993/DNABERT
-cd DNABERT
-python3 -m pip install --editable .
-cd examples
-python3 -m pip install -r requirements.txt
+# in python
+import torch
+from transformers import AutoTokenizer, AutoModel
+
+tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-S", trust_remote_code=True)
+model = AutoModel.from_pretrained("zhihan1996/DNABERT-S", trust_remote_code=True)
+
+dna = "ACGTAGCATCGGATCTATCTATCGACACTTGGTTATCGATCTACGAGCATCTCGTTAGC"
+inputs = tokenizer(dna, return_tensors = 'pt')["input_ids"]
+hidden_states = model(inputs)[0] # [1, sequence_length, 768]
+
+# embedding with mean pooling
+embedding_mean = torch.mean(hidden_states[0], dim=0)
+print(embedding_mean.shape) # expect to be 768
 ```
-Afterwards, the data has to be conerted into kmer formatting using the seq2kmer function from scripts/kmer_formatting.py
 
