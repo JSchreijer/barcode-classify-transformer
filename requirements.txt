@@ -1,5 +1,6 @@
 einops
-transformers==4.27
+tokenizers
+transformers
 peft
 omegaconf
 torch
