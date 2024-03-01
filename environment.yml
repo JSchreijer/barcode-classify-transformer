@@ -4,6 +4,9 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - openssl
+  - pkg-config
+  - rust
   - pip
   - pip:
     - -r requirements.txt
