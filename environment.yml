@@ -1,0 +1,9 @@
+name: DNABERT_S
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - pip
+  - pip:
+    - -r requirements.txt

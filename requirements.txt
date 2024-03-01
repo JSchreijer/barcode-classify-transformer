@@ -1,3 +1,13 @@
-biopython
-snakemake
-pulp >=2.0
+einops
+transformers==4.27
+peft
+omegaconf
+torch
+evaluate
+accelerate
+numpy
+scikit-learn
+Pillow
+textaugment
+scipy
+gdown
