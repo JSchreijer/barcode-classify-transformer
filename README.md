@@ -3,7 +3,7 @@ Repository for experiments with AI transformer model-based barcode classificatio
 Internship by Jitske Schreijer
 
 In this thesis I will be working with data from https://github.com/luukromeijn/MDDB-phylogeny/tree/main 
-and implementing this, using a transformer model. This transformer model will be based on DNABERT
+and implementing this, using a transformer model. This transformer model will be based on DNABERT-S
 ```
  @misc{zhou2023dnabert2,
       title={DNABERT-2: Efficient Foundation Model and Benchmark For Multi-Species Genome}, 
@@ -15,19 +15,11 @@ and implementing this, using a transformer model. This transformer model will be
 }
 ```
 # Environment setup
-For this research,a virtual environment using snakemake was created. this will me done using the  
-vagrant virtual machine, creating an 64-bit Ubuntu Linux environment.
+For this research,a virtual conda environment using snakemake was created. this will be done using an 64-bit Ubuntu Linux environment. 
+Make sure the virtual environment is created using python3.8. Otherwise, the package transformers will not be able to download. 
 
-the new virtual environment will be created and activated using
-```
-> vagrant init hashicorp/precise64
-> vagrant up
-```
-
-Next, Mambaforge has to be installed, via the Vagrant Linux VM. 
-```
-curl -L https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh -o Mambaforge-Linux-x86_64.sh
-bash Mambaforge-Linux-x86_64.sh
+An easy way to link the Ubuntu Linux environment with the snakefiles and python files, is to use the interface "JetBrains Gateway". 
+Here, the terminal can be used as virtual environment and switching between the WSL terminal and python won't be necessary. 
 
 ```
 Afterwards, a working directory is created using the mkdir function and calling it using the cd function. 
@@ -38,6 +30,8 @@ For the creation of DNABERT-S, the following packages are required:
 # command line
 gdown 1p59ch_MO-9DXh3LUIvorllPJGLEAwsUp # pip install gdown
 unzip dnabert-s_train.zip  # unzip the data 
+ 
+pip install -r requirements.txt
 
 # in python
 import torch
