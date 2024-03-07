@@ -47,9 +47,10 @@ hidden_states = model(inputs)[0] # [1, sequence_length, 768]
 # embedding with mean pooling
 embedding_mean = torch.mean(hidden_states[0], dim=0)
 print(embedding_mean.shape) # expect to be 768
-```
+
 
 # Training the model 
+```
 cd pretrain 
 export PATH_TO_DATA_DICT=../../
 export TRAIN_FILE=train_test.csv 
@@ -76,3 +77,4 @@ python main.py \
     --mix_layer_num -1 \
     --curriculum 
 
+``` 
