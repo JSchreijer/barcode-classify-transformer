@@ -49,3 +49,30 @@ embedding_mean = torch.mean(hidden_states[0], dim=0)
 print(embedding_mean.shape) # expect to be 768
 ```
 
+# Training the model 
+cd pretrain 
+export PATH_TO_DATA_DICT=../../
+export TRAIN_FILE=train_test.csv 
+
+python main.py \
+    --resdir ./results/ \
+    --datapath ${PATH_TO_DATA_DICT} \
+    --train_dataname ${TRAIN_FILE} \
+    --val_dataname val_48k.csv \
+    --seed 1 \
+    --logging_step 100 \
+    --logging_num 12 \
+    --max_length 20 \
+    --train_batch_size 6 \
+    --val_batch_size 36 \
+    --lr 3e-06 \
+    --lr_scale 100 \
+    --epochs 3 \
+    --feat_dim 128 \
+    --temperature 0.05 \
+    --con_method same_species \
+    --mix \
+    --mix_alpha 1.0 \
+    --mix_layer_num -1 \
+    --curriculum 
+
