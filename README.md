@@ -61,11 +61,11 @@ python main.py \
     --train_dataname ${TRAIN_FILE} \
     --val_dataname val_48k.csv \
     --seed 1 \
-    --logging_step 100 \
+    --logging_step 10000 \
     --logging_num 12 \
     --max_length 20 \
     --train_batch_size 6 \
-    --val_batch_size 36 \
+    --val_batch_size 360 \
     --lr 3e-06 \
     --lr_scale 100 \
     --epochs 3 \
@@ -78,3 +78,5 @@ python main.py \
     --curriculum 
 
 ``` 
+This is the model training based on the dataset from the MDDB-phylogeny. 
+The test_train is the trainingset of 25 chunks (see Lena's thesis) and repurposed into a csv file of two rows and no columns.
