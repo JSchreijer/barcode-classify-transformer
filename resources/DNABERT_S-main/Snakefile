@@ -1,0 +1,8 @@
+#snakefile
+
+
+rule model_download:
+    input:
+        "loading_model.py"
+    shell:
+        "python loading_model.py"
