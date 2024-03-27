@@ -12,3 +12,4 @@ Pillow
 textaugment
 scipy
 gdown
+biopython
