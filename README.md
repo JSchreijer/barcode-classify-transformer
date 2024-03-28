@@ -63,6 +63,12 @@ print(embedding_mean.shape) # expect to be 768
 
 ```
 ## Training the model 
+
+First we need to create the training data for the model. For this model, we use the data from MDDB-phylogeny. More specifically, we use the recommended dataset.
+this dataset is called [l0.2_s3_4_1500_o1.0_a0_constr_localpair](data%2Fl0.2_s3_4_1500_o1.0_a0_constr_localpair). From this dataset, the unaligned chunks are used. 
+To create a dataset in the correct format, sequence_pairing.py can be used to create pairwise aligned sequences in rows with two columns and no headers. 
+
+Afterwards, the model can be trained: 
 ```
 cd pretrain 
 export PATH_TO_DATA_DICT=../../
