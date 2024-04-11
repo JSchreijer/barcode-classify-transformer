@@ -1,7 +1,7 @@
 
 
 FROM ubuntu:latest
-LABEL authors="jitsk"
+LABEL authors="JSchreijer"
 
 ENTRYPOINT ["top", "-b"]
 
@@ -11,10 +11,17 @@ FROM python:3.8
 # Set the working directory in the container
 WORKDIR /app
 
+#install git
+RUN apt-get update && apt-get install -y git
+
+# Clone DNABERT_S repository
+RUN git clone https://github.com/MAGICS-LAB/DNABERT_S
+
+# Set the working directory to DNABERT_S
+WORKDIR /app/DNABERT_S
+
 # Install gdown and unzip data for training
 RUN pip install gdown && \
-    gdown https://drive.google.com/uc?id=1ejNOMXdycorDzphLT6jnfGIPUxi6fO0g && \
-    unzip dnabert-s_train.zip && \
     gdown https://drive.google.com/uc?id=1p59ch_MO-9DXh3LUIvorllPJGLEAwsUp && \
     unzip dnabert-s_train.zip && \
     gdown https://drive.google.com/uc?id=1I44T2alXrtXPZrhkuca6QP3tFHxDW98c && \
@@ -41,7 +48,7 @@ RUN python -c "import torch; from transformers import AutoTokenizer, AutoModel; 
 
 # Continue with remaining commands
 RUN export PATH_TO_DATA_DICT=/../../../../data && \
-    export TRAIN_FILE=train.fasta && \
+    export TRAIN_FILE=aligned_sequences.csv && \
     python main.py \
         --resdir ./results/ \
         --datapath ${PATH_TO_DATA_DICT} \
@@ -64,7 +71,7 @@ RUN export PATH_TO_DATA_DICT=/../../../../data && \
         --mix_layer_num -1 \
         --curriculum
 
-RUN export MODEL_DIR=/barcode-classify-transformer/resources/DNABERT_S-main/pretrain/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue && \
+RUN export MODEL_DIR=/barcode-classify-transformer/resources/DNABERT_S-main/pretrain/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs8.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best && \
     cp model_codes/* ${MODEL_DIR}
 
 RUN export DATA_DIR=. && \
@@ -72,10 +79,10 @@ RUN export DATA_DIR=. && \
     python eval_clustering_classification.py --data_dir ${DATA_DIR} --model_list "tnf, dnabert2"
 
 RUN export DATA_DIR=. && \
-    export MODEL_DIR=/barcode-classify-transformer/resources/DNABERT_S-main/models/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue && \
+    export MODEL_DIR=/barcode-classify-transformer/resources/DNABERT_S-main/models/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs8.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best && \
     python eval_binning.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test" && \
     python eval_binning.py --data_dir ${DATA_DIR} --model_list "tnf, dnabert2"
 
 RUN export DATA_DIR=. && \
-    export MODEL_DIR=../pretrain/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best && \
+    export MODEL_DIR=../pretrain/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs8.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best && \
     python eval_binning.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test"
