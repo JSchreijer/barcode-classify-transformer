@@ -1,11 +1,37 @@
 import os
 import csv
+import random
+from Bio import SeqIO
 
 # Define the input folder containing sequence files
 input_folder = '../data/l0.2_s3_4_1500_o1.0_a0_constr_localpair/chunks/unaligned'
 
 # Define the output CSV file
-output_file = 'output.csv'
+output_file = 'aligned_sequences.csv'
+
+# Define the maximum number of sequence pairs per chunk
+max_pairs_per_chunk = 500
+
+def read_fasta_sequences(fasta_file):
+    """Read sequences from a FASTA file."""
+    sequences = []
+    with open(fasta_file, 'r') as file:
+        for record in SeqIO.parse(file, 'fasta'):
+            sequences.append(str(record.seq))
+    return sequences
+
+def generate_pairs(items, num_pairs):
+    """Generate unique pairs of sequences."""
+    pairs = []
+    while len(pairs) < num_pairs:
+        # Shuffle the list of items
+        random.shuffle(items)
+        # Pair up the items
+        for i in range(0, len(items) - 1, 2):
+            pairs.append((items[i], items[i+1]))
+            if len(pairs) == num_pairs:
+                break
+    return pairs[:num_pairs]
 
 # Open the output CSV file in write mode
 with open(output_file, 'w', newline='') as csvfile:
@@ -15,30 +41,14 @@ with open(output_file, 'w', newline='') as csvfile:
     for filename in os.listdir(input_folder):
         file_path = os.path.join(input_folder, filename)
 
-        # Check if the file is a regular file (not a directory)
-        if os.path.isfile(file_path):
-            # Read sequences from the current file
-            with open(file_path, 'r') as file:
-                sequences = []
-                current_sequence = ''
-                # Iterate over lines in the file
-                for line in file:
-                    # Check if the line is a header line starting with ">"
-                    if line.startswith(">"):
-                        # Append the previous sequence if it's not empty
-                        if current_sequence:
-                            sequences.append(current_sequence)
-                            current_sequence = ''
-                    else:
-                        # Concatenate the lines to form the current sequence
-                        current_sequence += line.strip()
+        # Read sequences from the current file
+        sequences = read_fasta_sequences(file_path)
 
-                # Append the last sequence
-                if current_sequence:
-                    sequences.append(current_sequence)
+        # Generate pairs of sequences
+        pairs = generate_pairs(sequences, max_pairs_per_chunk)
 
-                # Write the pairs of sequences into two columns
-                for i in range(0, len(sequences), 2):
-                    # Ensure that there are two sequences to pair
-                    if i + 1 < len(sequences):
-                        writer.writerow([sequences[i], sequences[i + 1]])
+        # Write pairs to the CSV file
+        for pair in pairs:
+            writer.writerow(pair)
+
+print("Pairs have been successfully written to", output_file)
