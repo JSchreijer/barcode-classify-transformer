@@ -1,6 +1,3 @@
-Sure, here's the script with argparse for input, output, and max pairs:
-
-```python
 import os
 import csv
 import random
@@ -81,6 +78,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-```
-
-This script uses argparse to specify the input folder, output file, Excel file with specific IDs, and the maximum number of sequence pairs per chunk.
