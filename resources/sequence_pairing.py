@@ -1,10 +1,16 @@
+Sure, here's the script with argparse for input, output, and max pairs:
 
+```python
 import os
 import csv
 import random
-import argparse
 from Bio import SeqIO
 import pandas as pd
+import logging
+import argparse
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to read FASTA sequences from a file using Biopython
 def read_fasta_sequences(fasta_file):
@@ -26,14 +32,7 @@ def generate_pairs(items, num_pairs):
                 break
     return pairs[:num_pairs]
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate pairs of sequences from FASTA files.")
-    parser.add_argument("--input_folder", type=str, help="Path to the folder containing sequence files.")
-    parser.add_argument("--output_file", type=str, help="Path to the output CSV file.")
-    parser.add_argument("--max_pairs_per_chunk", type=int, default=500, help="Maximum number of sequence pairs per chunk.")
-    parser.add_argument("--excel_file", type=str, help="Path to the Excel file containing specific IDs to skip.")
-    args = parser.parse_args()
-
+def main(args):
     # Read the specific IDs from the Excel file
     df = pd.read_excel(args.excel_file)
     specific_ids = df['ID'].tolist()
@@ -48,17 +47,40 @@ if __name__ == "__main__":
 
             # Check if the file is a regular file (not a directory)
             if os.path.isfile(file_path):
+                logging.info(f'Reading sequences from file: {file_path}')
+
                 # Read sequences from the current file using Biopython
                 sequences = read_fasta_sequences(file_path)
 
-                # Remove sequences with specific IDs
-                sequences = [seq for seq in sequences if seq.split('|')[0] not in specific_ids]
+                # Select sequences without specific IDs
+                sequences_without_specific_ids = [seq for seq in sequences if seq.split('|')[0] not in specific_ids]
+                logging.info(f'Found {len(sequences_without_specific_ids)} sequences without specific IDs')
 
                 # Generate pairs of sequences, limited to max_pairs_per_chunk
-                pairs = generate_pairs(sequences, args.max_pairs_per_chunk)
+                pairs = generate_pairs(sequences_without_specific_ids, args.max_pairs_per_chunk)
+                logging.info(f'Generated {len(pairs)} pairs of sequences')
 
                 # Write pairs to the CSV file
                 for pair in pairs:
                     writer.writerow(pair)
 
+                # Check if any sequences in the output CSV correspond with sequences in the Excel file
+                output_sequences = [seq.split('|')[0] for seq in sequences_without_specific_ids]
+                matching_sequences = [seq for seq in output_sequences if seq in specific_ids]
+                if matching_sequences:
+                    logging.warning(f'Found {len(matching_sequences)} sequences in the output CSV matching sequences in the Excel file')
 
+    logging.info('Script execution completed')
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate pairs of sequences from FASTA files")
+    parser.add_argument("--input_folder", type=str, required=True, help="Input folder containing sequence files")
+    parser.add_argument("--output_file", type=str, required=True, help="Output CSV file for sequence pairs")
+    parser.add_argument("--excel_file", type=str, required=True, help="Excel file containing specific IDs")
+    parser.add_argument("--max_pairs_per_chunk", type=int, default=500, help="Maximum number of sequence pairs per chunk")
+    args = parser.parse_args()
+
+    main(args)
+```
+
+This script uses argparse to specify the input folder, output file, Excel file with specific IDs, and the maximum number of sequence pairs per chunk.
