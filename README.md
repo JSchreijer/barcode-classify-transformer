@@ -64,15 +64,16 @@ print(embedding_mean.shape) # expect to be 768
 ```
 ## Training the model 
 
-First we need to create the training data for the model. For this model, we use the data from MDDB-phylogeny. More specifically, we use the recommended dataset.
-this dataset is called [l0.2_s3_4_1500_o1.0_a0_constr_localpair](data%2Fl0.2_s3_4_1500_o1.0_a0_constr_localpair). From this dataset, the unaligned chunks are used. 
+First we need to create the training data for the model. For this model, we use the data from MDDB-phylogeny. More specifically, we use the recommended dataset, called [l0.2_s3_4_1500_o1.0_a0_constr_localpair](data%2Fl0.2_s3_4_1500_o1.0_a0_constr_localpair). 
+From this dataset, the unaligned chunks folder is used.  
 To create a dataset in the correct format, sequence_pairing.py can be used to create pairwise aligned sequences in rows with two columns and no headers. 
-
+This script runs throught all of the unaligned folders and creates pairs from sequences within each chunk. It also skips over any sequence ID that is used in the results table of "ten Haaf, L., Verbeek, F., & Vos, R. (2022). BSc Bioinformatics Localized Information Comparison and Analysis for MycoDiversity Database."
+This is done to make sure the final results can compared to one another. 
 Afterwards, the model can be trained: 
 ```
 cd pretrain 
 export PATH_TO_DATA_DICT=../../
-export TRAIN_FILE=train.csv 
+export TRAIN_FILE=aligned_sequences.csv
 
 python main.py \
     --resdir ./results/ \
@@ -98,7 +99,7 @@ python main.py \
 
 ``` 
 This is the model training based on the dataset from the MDDB-phylogeny. 
-The test_train is the trainingset of 25 chunks (see Lena's thesis) and repurposed into a csv file of two rows and no columns.
+The aligned_sequences is the trainingset (see Lena's thesis) and repurposed into a csv file of two rows and no columns.
 
 Afterwards, the necessary files are copied to the folder where the model is saved. This is a bug in Huggingface Transformers package.
 Sometimes the model file such as bert_layer.py are not automatically saved to the model directory together with the model weights. So we manually do it.
