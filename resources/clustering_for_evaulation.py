@@ -38,10 +38,10 @@ def generate_matched_sequences_tsv(input_folder, excel_file, output_file, id_out
                     if sequence_id in excel_ids:
                         # Write all sequences from this file along with the filename
                         bin_id = os.path.splitext(file)[0]
-                        out_file.write(f"{record.seq}\t{bin_id}\n")
-
-                        # Add the sequence ID to the set of all IDs
-                        all_sequence_ids.add(sequence_id)
+                        for seq_record in sequences:
+                            out_file.write(f"{seq_record.seq}\t{bin_id}\n")
+                            all_sequence_ids.add(seq_record.id)  # Add sequence ID to set
+                        break  # Stop searching for matches in this file once one is found
 
         # Write all unique sequence IDs to the id_output_file
         for sequence_id in all_sequence_ids:
