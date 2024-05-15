@@ -19,61 +19,48 @@ def read_fasta_sequences(fasta_file):
     return sequences
 
 # Function to generate pairs of sequences
-def generate_pairs(items, num_pairs):
+def generate_pairs(items):
     pairs = []
-    while len(pairs) < num_pairs:
-        random.shuffle(items)
-        for i in range(0, len(items) - 1, 2):
-            pairs.append((items[i], items[i + 1]))
-            if len(pairs) == num_pairs:
-                break
-    return pairs[:num_pairs]
+    random.shuffle(items)
+    for i in range(0, len(items) - 1, 2):
+        pairs.append((items[i], items[i + 1]))
+    return pairs
 
 def main(input_folder, output_file, excel_file, max_pairs_percentage):
     # Read the specific IDs from the Excel file
     df = pd.read_excel(excel_file)
     specific_ids = set(df['ID'].tolist())
 
-    # Calculate total number of sequence pairs
-    total_pairs = 0
+    # List to store all sequences from all files
+    all_sequences = []
+
+    # Loop through each file in the input folder
     for filename in os.listdir(input_folder):
         file_path = os.path.join(input_folder, filename)
         if os.path.isfile(file_path):
-            sequences = read_fasta_sequences(file_path)
-            total_pairs += len(sequences) // 2
+            logging.info(f'Reading sequences from file: {file_path}')
 
-    # Calculate the number of pairs to generate (80% of total)
-    num_pairs = int(total_pairs * max_pairs_percentage)
+            # Read sequences from the current file using Biopython
+            sequences = read_fasta_sequences(file_path)
+
+            # Skip sequences with specific IDs
+            sequences_without_specific_ids = [seq for seq in sequences if seq.split('|')[0] not in specific_ids]
+
+            # Add sequences to the list of all sequences
+            all_sequences.extend(sequences_without_specific_ids)
+
+    # Calculate the number of sequences to select (80% of total)
+    num_sequences_to_select = int(len(all_sequences) * max_pairs_percentage)
+
+    # Select 80% of the total sequences
+    selected_sequences = random.sample(all_sequences, num_sequences_to_select)
 
     # Open the output CSV file in write mode
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
 
-        # List to store all sequences
-        all_sequences = []
-
-        # Loop through each file in the input folder
-        for filename in os.listdir(input_folder):
-            file_path = os.path.join(input_folder, filename)
-
-            # Check if the file is a regular file (not a directory)
-            if os.path.isfile(file_path):
-                logging.info(f'Reading sequences from file: {file_path}')
-
-                # Read sequences from the current file using Biopython
-                sequences = read_fasta_sequences(file_path)
-
-                # Skip sequences with specific IDs
-                sequences_without_specific_ids = [seq for seq in sequences if seq.split('|')[0] not in specific_ids]
-
-                # Add sequences to the list of all sequences
-                all_sequences.extend(sequences_without_specific_ids)
-
-        # Select 80% of the total sequences
-        selected_sequences = random.sample(all_sequences, num_pairs * 2)
-
-        # Generate pairs of sequences
-        pairs = generate_pairs(selected_sequences, num_pairs)
+        # Generate pairs within the selected sequences
+        pairs = generate_pairs(selected_sequences)
         logging.info(f'Generated {len(pairs)} pairs of sequences')
 
         # Write pairs to the CSV file
