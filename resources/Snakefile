@@ -1,0 +1,8 @@
+#snakefile
+
+
+rule sequence_pairing:
+    input:
+        "sequence_pairing.py"
+    shell:
+        "python sequence_pairing.py"
