@@ -5,6 +5,10 @@ import pandas as pd
 from Bio import SeqIO
 import logging
 
+#This file is used to create the dataset that can be later used for the evaluation of the trained model
+#It makes sure it takes only 20% of the total dataset and includes the Lena list that was excluded from the training
+
+
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
