@@ -12,6 +12,7 @@ from utils import get_embedding
 
 csv.field_size_limit(sys.maxsize)
 
+#This script can be used as evaluation step of the DNABERT model and is modified to work for only one dataset instead of multiple
 
 def save_embeddings(embeddings, labels, filename):
     data = {'embeddings': embeddings, 'labels': labels}
