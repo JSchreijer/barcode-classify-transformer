@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 from utils import modified_get_embedding
 
+
 csv.field_size_limit(sys.maxsize)
 
 def save_embeddings(embeddings, labels, filename):
