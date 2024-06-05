@@ -8,7 +8,7 @@ from sklearn.preprocessing import normalize, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
-from utils import get_embedding
+from utils import modified_get_embedding
 
 csv.field_size_limit(sys.maxsize)
 
@@ -33,7 +33,6 @@ def classify_sequence(sequence, knn_model, model, species, sample, test_model_di
     embedding_standard = StandardScaler().fit_transform(embedding)
     prediction = knn_model.predict(embedding_standard)
     return prediction
-
 
 def main(args):
     model_list = args.model_list.split(",")
@@ -66,7 +65,7 @@ def main(args):
                 for file in files:
                     print(os.path.join(root, file))
 
-            embedding = get_embedding(dna_sequences, model, species, sample, test_model_dir=args.test_model_dir)
+            embedding = modified_get_embedding(dna_sequences, model, species, sample, test_model_dir=args.test_model_dir)
             embedding_norm = normalize(embedding)
             embedding_standard = StandardScaler().fit_transform(embedding)
 
@@ -78,8 +77,7 @@ def main(args):
             knn_classifier = train_knn_classifier(embedding_filename)
 
             # Evaluate accuracy
-            X_train, X_test, y_train, y_test = train_test_split(embedding_standard, labels, test_size=0.2,
-                                                                random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(embedding_standard, labels, test_size=0.2, random_state=42)
             y_pred = knn_classifier.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
             report = classification_report(y_test, y_pred)
@@ -89,7 +87,6 @@ def main(args):
 
         except Exception as e:
             print(f"Error generating embeddings: {e}")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
