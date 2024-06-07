@@ -7,19 +7,19 @@ import joblib
 from sklearn.preprocessing import normalize, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 from utils import modified_get_embedding
 
 csv.field_size_limit(sys.maxsize)
 
-#This script can be used as evaluation step of the DNABERT model and is modified to work for only one dataset instead of multiple
+# This script can be used as an evaluation step of the DNABERT model and is modified to work for only one dataset instead of multiple
 
 def save_embeddings(embeddings, labels, filename):
     data = {'embeddings': embeddings, 'labels': labels}
     joblib.dump(data, filename)
 
-
-def train_knn_classifier(embedding_file, n_neighbors=5):
+def train_knn_classifier(embedding_file, n_neighbors=3):
     data = joblib.load(embedding_file)
     embeddings = data['embeddings']
     labels = data['labels']
@@ -27,9 +27,8 @@ def train_knn_classifier(embedding_file, n_neighbors=5):
     knn.fit(embeddings, labels)
     return knn
 
-
 def classify_sequence(sequence, knn_model, model, species, sample, test_model_dir):
-    embedding = get_embedding([sequence], model, species, sample, test_model_dir=test_model_dir)
+    embedding = modified_get_embedding([sequence], model, species, sample, test_model_dir=test_model_dir)
     embedding_standard = StandardScaler().fit_transform(embedding)
     prediction = knn_model.predict(embedding_standard)
     return prediction
@@ -67,7 +66,7 @@ def main(args):
 
             embedding = modified_get_embedding(dna_sequences, model, species, sample, test_model_dir=args.test_model_dir)
             embedding_norm = normalize(embedding)
-            embedding_standard = StandardScaler().fit_transform(embedding)
+            embedding_standard = StandardScaler().fit_transform(embedding_norm)
 
             embedding_filename = f'embeddings_{model}_{species}_{sample}.pkl'
             save_embeddings(embedding_standard, labels, embedding_filename)
@@ -78,12 +77,47 @@ def main(args):
 
             # Evaluate accuracy
             X_train, X_test, y_train, y_test = train_test_split(embedding_standard, labels, test_size=0.2, random_state=42)
+
+            print("Shapes:")
+            print(f"X_train: {X_train.shape}, X_test: {X_test.shape}")
+            print(f"y_train: {y_train.shape}, y_test: {y_test.shape}")
+
             y_pred = knn_classifier.predict(X_test)
+
+            print("y_test sample:", y_test[:10])
+            print("y_pred sample:", y_pred[:10])
+
+            # Check if y_test and y_pred are identical
+            if np.array_equal(y_test, y_pred):
+                print("Warning: y_test and y_pred are identical, which is unexpected.")
+
             accuracy = accuracy_score(y_test, y_pred)
-            report = classification_report(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+            cm = confusion_matrix(y_test, y_pred)
+
             print("Accuracy:", accuracy)
             print("Classification Report:")
-            print(report)
+            print(classification_report(y_test, y_pred))
+            print("Confusion Matrix:")
+            print(cm)
+
+            avg_precision = np.mean([v['precision'] for k, v in report.items() if isinstance(v, dict)])
+            avg_recall = np.mean([v['recall'] for k, v in report.items() if isinstance(v, dict)])
+
+            print("Average Precision:", avg_precision)
+            print("Average Recall:", avg_recall)
+
+            # Display confusion matrix for a subset of classes
+            subset_classes = 10  # Number of classes to display in the confusion matrix
+            unique_labels = np.unique(y_test)
+            subset_labels = unique_labels[:subset_classes]
+            mask = np.isin(y_test, subset_labels)
+            cm_subset = confusion_matrix(y_test[mask], y_pred[mask], labels=subset_labels)
+
+            display_labels = [k for k, v in label2id.items() if v in subset_labels]
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm_subset, display_labels=display_labels)
+            disp.plot(cmap=plt.cm.Blues)
+            plt.show()
 
         except Exception as e:
             print(f"Error generating embeddings: {e}")
