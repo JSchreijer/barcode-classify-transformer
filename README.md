@@ -108,30 +108,35 @@ Sometimes the model file such as bert_layer.py are not automatically saved to th
 cd evaluate
 
 #exporting model the best model 
-export MODEL_DIR=../pretrain/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best
+export MODEL_DIR=../pretrain/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best
 
 cp model_codes/* ${MODEL_DIR}
-
 ```
-Afterwards, the model will be evaluated. For the time being, the DNABERT_S reference data is used. 
-However, I am trying to create a testset of the MDDB dataset instead. 
 
+Afterwards, we opted for a KNN evaluation instead of the traditional evaluation and used the code of the original to create the KNN evaluation on the created embeddings. 
+I got this error: 
+
+  raise EnvironmentError(
+OSError: ../pretrain/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best does not appear to have a file named zhihan1996/DNABERT-2-117M--configuration_bert.py. Checkout 'https://huggingface.co/../pretrain/results/epoch3.aligned_sequences.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best/None' for available files.
+
+I solved this by changing the settings of config.json: "attention_probs_dropout_prob": 0.0,
+"auto_map": {
+    "AutoConfig": "configuration_bert.BertConfig",
+    "AutoModel": "bert_layers.BertModel",
+    "AutoModelForMaskedLM": "bert_layers.BertForMaskedLM",
+    "AutoModelForSequenceClassification": "bert_layers.BertForSequenceClassification"
+},
+
+This was different for the other model that DID work. 
+
+Now for the evaluation I created two new files called KNN_evaluation.py and linear_probing_evaluation.py
+
+These two work with argparse:
 ```
-export DATA_DIR=.
-export MODEL_DIR=/barcode-classify-transformer/resources/DNABERT_S-main/models/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue
 
-# evaluate the trained model
-python eval_binning.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test"
-
-# evaluate baselines (e.g., TNF and DNABERT-2)
-python eval_binning.py --data_dir ${DATA_DIR} --model_list "tnf, dnabert2"
-
-export DATA_DIR=.
-export MODEL_DIR=../pretrain/results/epoch3.train_test.csv.lr3e-06.lrscale100.bs6.maxlength20.tmp0.05.seed1.con_methodsame_species.mixTrue.mix_layer_num-1.curriculumTrue/best
-export CUDA_VISIBLE_DEVICES=1
-
-# evaluate the trained model
-python eval_binning.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test"
-
+KNN_evaluation.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test"
+Linear_probing_evaluation.py --test_model_dir ${MODEL_DIR} --data_dir ${DATA_DIR} --model_list "test"
 ```
+These two evaluation scripts create a kNN and linear probing algorithm respectively, using the "evaluation_sequences.tsv" file that was created for that purpose. 
+They each give a value for the accuracy of the trained model and create a t-SNE for visualising purposes.
 
